@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const express = require("express")
+const path = require("path")
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const { adminProtected } = require("./middleware/protected")
@@ -21,7 +22,8 @@ app.use("/api/auth", require("./routes/authRoute"))
 app.use("/api/user", require("./routes/userRoute"))
 app.use("/api/admin", require("./routes/adminRoute"))
 app.use("*", (req, res) => {
-    res.status(404).json({ message: "Page not found" })
+    res.sendFile(path.join(__dirname, "build", "infdex.html"))
+    // res.status(404).json({ message: "Page not found" })
 })
 
 app.use((err, req, res, next) => {
