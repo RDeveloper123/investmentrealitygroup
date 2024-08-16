@@ -46,87 +46,20 @@ exports.deleteCms = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Cms Delete Success" })
 })
 
-// //property type
-// exports.getType = asyncHandler(async (req, res) => {
-//     const result = await PropertyType.find()
-//     res.json({ message: "Type Fetch Successfully", result })
-// })
-
-// exports.addType = asyncHandler(async (req, res) => {
-//     const { type } = req.body
-//     const { isError, error } = checkEmpty({ type })
-//     if (isError) {
-//         return res.status(400).json({ message: "All Feilds Required", error })
-//     }
-
-//     const result = await PropertyType.create(req.body)
-//     res.status(201).json({ message: "Type Added Successfully", data: result })
-// })
-// exports.updateType = asyncHandler(async (req, res) => {
-//     const { id } = req.params
-//     const { isError, error } = checkEmpty({ id })
-//     if (isError) {
-//         return res.status(400).json({ message: "All Feilds Required", error })
-//     }
-//     await PropertyType.findByIdAndUpdate(id, req.body)
-//     res.json({ message: "Type Updated Successfully" })
-// })
-
-// exports.deleteType = asyncHandler(async (req, res) => {
-//     const { id } = req.params
-//     const { isError, error } = checkEmpty({ id })
-//     if (isError) {
-//         return res.status(400).json({ message: "All Feilds Required", error })
-//     }
-//     await PropertyType.findByIdAndDelete(id)
-//     res.json({ message: "Type Deleted Successfully" })
-// })
-
-// //property status
-// exports.getPropertyStatus = asyncHandler(async (req, res) => {
-//     const result = await PropertyStatus.find()
-//     res.json({ message: "Type Fetch Successfully", result })
-// })
-
-// exports.addPropertyStatus = asyncHandler(async (req, res) => {
-//     const { type } = req.body
-//     const { isError, error } = checkEmpty({ type })
-//     if (isError) {
-//         return res.status(400).json({ message: "All Feilds Required", error })
-//     }
-
-//     const result = await PropertyStatus.create(req.body)
-//     res.status(201).json({ message: "Type Added Successfully", data: result })
-// })
-// exports.updatePropertyStatus = asyncHandler(async (req, res) => {
-//     const { id } = req.params
-//     const { isError, error } = checkEmpty({ id })
-//     if (isError) {
-//         return res.status(400).json({ message: "All Feilds Required", error })
-//     }
-//     await PropertyStatus.findByIdAndUpdate(id, req.body)
-//     res.json({ message: "Type Updated Successfully" })
-// })
-
-// exports.deletePropertyStatus = asyncHandler(async (req, res) => {
-//     const { id } = req.params
-//     const { isError, error } = checkEmpty({ id })
-//     if (isError) {
-//         return res.status(400).json({ message: "All Feilds Required", error })
-//     }
-//     await PropertyStatus.findByIdAndDelete(id)
-//     res.json({ message: "Type Deleted Successfully" })
-// })
 
 //property
-
 exports.getProperty = asyncHandler(async (req, res) => {
-    const result = await Property.find({
-        propertStatus: req.body.propertyStatus,
-        propertyType: req.body.propertyType
-    })
-    res.json({ message: "Property get  Successfully", result })
-})
+    const data = req.query;
+
+    const result = await Property.find(data);
+    console.log(result);
+  
+    if (!result) {
+      return res.status(404).json({ message: 'No properties found' });
+    }
+  
+    res.status(200).json(result);
+  });
 exports.getAllProperty = asyncHandler(async (req, res) => {
     const result = await Property.find()
     res.json({ message: "All Property get  Successfully", result })
@@ -137,19 +70,21 @@ exports.addProperty = asyncHandler(async (req, res) => {
         console.log(req.body);
 
         const { price,
+            budget,
             city,
             landmark,
             desc,
-           
+           preselection,
             propertyStatus,
             propertyType
         } = req.body
         const { isError, error } = checkEmpty({
             price,
+            budget,
             city,
             landmark,
             desc,
-           
+            preselection,
             propertyStatus,
             propertyType
         })
@@ -160,64 +95,46 @@ exports.addProperty = asyncHandler(async (req, res) => {
             console.log(err);
             return res.status(400).json({ message: "upload error" })
         }
-        if (!req.files) {
+        if (!req.files || !req.files['image']) {
             return res.status(400).json({ message: "Image Is Required" })
         }
-        // console.log(req.files.video);
-        // console.log(req.files.image);
-        const imageData = [], videoData = [];
+        const imageData = [];
 
         if (req.files['image']) {
             for (let i = 0; i < req.files['image'].length; i++) {
                 const imageFile = req.files['image'][i];
                 imageData.push(imageFile);
-                // const result = await cloudinary.uploader.upload(imageFile.path);
-                // console.log(imageFile);
-                // filePromises.push(result);
             }
         }
-        // const result = await cloudinary.uploader.
 
-        if (req.files['video']) {
-            for (let i = 0; i < req.files['video'].length; i++) {
-                const videoFile = req.files['video'][i];
-                videoData.push(videoFile);
-                // const result = await cloudinary.uploader.upload(videoFile.path);
-                // console.log(videoFile);
-                // filePromises.push(result);
-            }
-        }
         const x = []
-        // let y
         for (const item of imageData) {
             const result = await cloudinary.uploader.upload(item.path)
             x.push(result.secure_url)
         }
-        if (videoData.length > 0) {
 
-            for (const item of videoData) {
+        let videoUrl = null;
+        if (req.files && req.files['video']) {
+            for (const item of req.files['video']) {
                 cloudinary.uploader.upload_large(item.path, { resource_type: "video" }, async (err, result) => {
                     if (err) {
                         console.log(err);
                         return res.status(400).json({ message: "ERROR" })
                     }
-                    await Property.create({
-                        ...req.body,
-                        image: x,
-                        video: result.secure_url
-                    })
-                    return res.json({ message: "OK" })
+                    videoUrl = result.secure_url;
                 })
             }
-        } else {
-
-            return res.json({ message: "OK" })
         }
-        // console.log(x);
-        // console.log(videoData);
 
+        await Property.create({
+            ...req.body,
+            image: x,
+            video: videoUrl
+        })
+        return res.json({ message: "OK" })
     })
 })
+
 exports.deleteProperty = asyncHandler(async (req, res) => {
     const { id } = req.params
     const { isError, error } = checkEmpty({ id })

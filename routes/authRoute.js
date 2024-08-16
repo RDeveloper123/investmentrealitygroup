@@ -9,6 +9,6 @@ router
     .post('/register-user', authController.registerUser)
     .post('/login-user', authController.loginUser)
     // .post('/otp-verify', authController.verifyUserOtp)
-    .post('/logout-user', authController.loginUser)
+    .post('/logout-user', authController.logoutUser)
 
 module.exports = router

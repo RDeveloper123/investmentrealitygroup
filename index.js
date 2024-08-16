@@ -4,6 +4,7 @@ const path = require("path")
 const cors = require("cors")
 const cookieParser = require("cookie-parser")
 const { adminProtected } = require("./middleware/protected")
+
 require("dotenv").config()
 
 const app = express()

@@ -1,4 +1,4 @@
-const asyncHandler=require('express-async-handler')
+const asyncHandler = require('express-async-handler')
 const Cms = require('../models/Cms')
 
 exports.getCms = asyncHandler(async (req, res) => {

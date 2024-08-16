@@ -18,6 +18,8 @@ router
     // .delete('/delete-property-status/:id', adminController.deletePropertyStatus)
 
     // .get('/get-property', adminController.)
+
+    
     .post('/add-property',adminController.addProperty )
     .delete('/delete-property/:id',adminController.deleteProperty )
 
